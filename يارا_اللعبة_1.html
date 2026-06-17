@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>for yara 🎮</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep: #190B2E;
+    --bg-panel: #2D1B4E;
+    --pink: #FF3D8A;
+    --yellow: #FFD93D;
+    --cream: #FFF6E9;
+    --lavender: #B8A9D9;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background: radial-gradient(circle at 50% 0%, var(--bg-panel) 0%, var(--bg-deep) 65%);
+    font-family:'Tajawal', sans-serif;
+    color: var(--cream);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    overflow-x:hidden;
+  }
+
+  .cabinet{
+    width:100%;
+    max-width:480px;
+    background: linear-gradient(180deg, #241342, #1A0E30);
+    border: 3px solid var(--lavender);
+    border-radius: 28px;
+    padding: 28px 22px 32px;
+    box-shadow: 0 0 0 8px #150A28, 0 20px 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(255,61,138,0.08);
+    position: relative;
+  }
+
+  .marquee{
+    text-align:center;
+    font-family:'Lalezar', sans-serif;
+    font-size: 30px;
+    color: var(--yellow);
+    text-shadow: 0 0 12px rgba(255,217,61,0.6), 0 3px 0 rgba(0,0,0,0.4);
+    letter-spacing: 1px;
+    margin: 0 0 4px;
+  }
+
+  .sub{
+    text-align:center;
+    font-size: 13px;
+    color: var(--lavender);
+    font-weight: 700;
+    margin: 0 0 18px;
+    letter-spacing: 0.5px;
+  }
+
+  .screen{
+    background: #0F0820;
+    border-radius: 18px;
+    border: 2px solid #3A2A5C;
+    padding: 22px 16px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question{
+    text-align:center;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.6;
+    margin: 0 0 8px;
+    color: var(--cream);
+    min-height: 64px;
+  }
+
+  .taunt{
+    text-align:center;
+    font-size: 13px;
+    color: var(--pink);
+    font-weight: 700;
+    min-height: 18px;
+    margin-bottom: 10px;
+    transition: opacity 0.2s ease;
+  }
+
+  .stage{
+    position: relative;
+    height: 230px;
+    margin: 6px 0 14px;
+  }
+
+  .btn{
+    border: none;
+    border-radius: 14px;
+    font-family:'Tajawal', sans-serif;
+    font-weight: 900;
+    font-size: 17px;
+    cursor: pointer;
+    padding: 14px 26px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .yes-wrap{
+    position:absolute;
+    bottom: 16px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .yes{
+    background: linear-gradient(135deg, #FFD93D, #FF8A3D);
+    color: #2A1300;
+    box-shadow: 0 6px 0 #B5650A, 0 10px 18px rgba(0,0,0,0.35);
+  }
+  .yes:active{ transform: translateY(4px); box-shadow: 0 2px 0 #B5650A; }
+
+  .no{
+    position:absolute;
+    top: 8px;
+    right: 50%;
+    transform: translateX(50%);
+    background: linear-gradient(135deg, #FF3D8A, #B83DFF);
+    color: var(--cream);
+    box-shadow: 0 6px 0 #7A1C9C, 0 10px 18px rgba(0,0,0,0.35);
+    z-index: 3;
+  }
+
+  .score{
+    text-align:center;
+    font-size: 12px;
+    color: var(--lavender);
+    font-weight: 700;
+    border-top: 1px dashed #3A2A5C;
+    padding-top: 10px;
+  }
+  .score b{ color: var(--yellow); }
+
+  .footer-note{
+    text-align:center;
+    font-size: 11px;
+    color: #6E5C99;
+    margin-top: 16px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Celebration overlay */
+  .overlay{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(160deg, #1A0E30, #2D1B4E);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 24px;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.35s ease;
+    border-radius: 16px;
+  }
+  .overlay.show{ opacity:1; pointer-events:all; }
+
+  .overlay h2{
+    font-family:'Lalezar', sans-serif;
+    font-size: 28px;
+    color: var(--yellow);
+    margin: 0 0 10px;
+    text-shadow: 0 0 14px rgba(255,217,61,0.5);
+  }
+  .overlay p{
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0 0 6px;
+    color: var(--cream);
+  }
+  .overlay .small{
+    font-size: 12px;
+    color: var(--lavender);
+    margin-top: 10px;
+  }
+
+  .confetti{
+    position:absolute;
+    top:-10px;
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform: translateY(280px) rotate(540deg); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .btn, .overlay, .taunt{ transition:none; }
+    .confetti{ animation:none; display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cabinet">
+  <div class="marquee">🎮 for yara 🎮</div>
+  <div class="sub">ولو غلب حمارك... هتبقى عليكي حاجة 😏</div>
+
+  <div class="screen">
+    <div class="question" id="question">لو جدعة... قوليلي لأ 😏</div>
+    <div class="taunt" id="taunt">&nbsp;</div>
+
+    <div class="stage" id="stage">
+      <button class="btn no" id="noBtn">لأ 😅</button>
+      <div class="yes-wrap">
+        <button class="btn yes" id="yesBtn">استسلمت 🏳️</button>
+      </div>
+
+      <div class="overlay" id="overlay">
+        <h2>🎉 استسلمتي يا يارا 🎉</h2>
+        <p>وعليه... بقى عليكي حاجة، هتحددها بنفسك بعدين 😏</p>
+        <p class="small" id="finalScore"></p>
+        <div class="small">(يلا بقى، قوليلي هتعملي اي 😏)</div>
+      </div>
+    </div>
+
+    <div class="score">عدد مرات الهروب: <b id="count">0</b></div>
+  </div>
+
+  <div class="footer-note">PRESS ❤️ TO CONTINUE</div>
+</div>
+
+<script>
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+  const stage = document.getElementById('stage');
+  const taunt = document.getElementById('taunt');
+  const countEl = document.getElementById('count');
+  const overlay = document.getElementById('overlay');
+  const finalScore = document.getElementById('finalScore');
+
+  const taunts = [
+    "ده زرار ولا حارس مرمى؟ 😎",
+    "يارا يا يارا، الجري مش هيفيدك 😏",
+    "اللأ ده عنده باسبور هروب دائم 🛂",
+    "حاولي تاني يا نجمة، اللعبة بتحبك",
+    "ده زرار خبرة، إنتي براءة 😂",
+    "كل ما تقربي يزيد غروره",
+    "هو فاكر نفسه فاست اند فيوريوس 🏎️",
+    "يلا يا بطلة، مرة كمان",
+    "اللأ ده مدرب على الهروب من الجيم 💪",
+    "صدقيني هو بيتمنع بس بيحبك",
+    "ده مش لعب ده تمرين كارديو 🏃‍♀️",
+    "خليكي ثابتة، الزرار بيتعب أسرع منك",
+    "يارا تجري وراه والقلب واقف يتفرج ❤️",
+    "حاولي زاوية تانية يا أسطورة",
+    "ده زرار وقح بجد 😂",
+    "كل محاولة بتزود روشتك",
+    "هو حاسس نفسه نينجا دلوقتي 🥷",
+    "صبري عليه شوية وهيستسلم",
+    "ده زرار مغرور، بس برضو هيتعب",
+    "يلا يا قمر، خطوة كمان وهتمسكيه",
+    "هو شايف إنه أسرع منك، يا ريته",
+    "خليكي رايقة، التعب جاي عليه",
+    "ده زرار بيلعب دور البطل بس مفيش حد قاله",
+    "كل مرة بتلحقيه يزيد عناده",
+    "صدقيني روحه هربانة بس هو واقف",
+    "ده مش هروب ده عرض أزياء 💃",
+    "يارا اللعيبة، حاولي تاني",
+    "اللأ ده فاكر اللعبة بطولة عالمية 🏆",
+    "خليكي زي المحترفين، تكتيك مش عشوائية",
+    "ده زرار شقي بس مش أشقى منك",
+    "كل خطوة بتقربك من اللحظة الحاسمة",
+    "هو هيتعب، بس انتي مش هتتعبي",
+    "ده زرار بيتفلسف وهو بيهرب 😂",
+    "صدقيني الجولة دي ليكي",
+    "ده مش زرار ده ممثل درامي",
+    "يلا يا روشة، حاولي تاني",
+    "هو حاسس نفسه أسطورة هروب",
+    "خليكي فاكرة، الصبر سر الفوز",
+    "ده زرار وقاحته زيادة عن اللزوم 😏",
+    "كل مرة بتقربي بيزيد إيمانه إنه خلص",
+    "هو متأكد إنه فايز، يا حلاوة الثقة الزايدة",
+    "ده زرار بيتعامل وكأنه نجم سينما 🎬",
+    "يارا الجامدة، حاولي تاني",
+    "اللأ مبسوط إنه لسه في اللعبة",
+    "ده مش هروب ده استعراض",
+    "خليكي زي الصياد، صبر وتركيز",
+    "هو فاكر نفسه بطل أكشن 🎯",
+    "كل محاولة بتدخل التاريخ يا يارا",
+    "ده زرار مغرور بس قلبه مش معاه",
+    "صدقيني الفوز قريب، حسي بيه",
+    "ده زرار شايف نفسه فهلوي",
+    "يلا يا نجمة الجري، حاولي زاوية",
+    "هو هيتعب، بس مش دلوقتي",
+    "خليكي صبورة، اللعبة بتحبك أكتر منه",
+    "ده زرار بيهرب بس بيضحك جوايا",
+    "كل مرة بتزود حماسك يا بطلة",
+    "هو متأكد إنه هيكسب، خلينا نشوف",
+    "ده زرار جدع بس مش أجدع منك",
+    "صدقيني التعب اللي بتاخديه ليه قيمة",
+    "يلا يا قمر، خليكي قريبة شوية كمان",
+    "ده مش زرار ده فنان هروب",
+    "هو بيستعرض، انتي بس استمري",
+    "خليكي زي البطلة، اللحظة جاية",
+    "ده زرار عنيد زيك بالظبط، حلوة المنافسة",
+    "كل خطوة بتاخديها بتقرب النهاية الحلوة",
+    "هو مش هيستحمل كتير، صدقيني",
+    "ده زرار بيدّعي الثقة بس جوايا خايف",
+    "يلا يا روشة الحركة، حاولي تاني",
+    "صدقيني هتمسكيه، بس محتاجة شوية وقت",
+    "ده زرار شاطر بس انتي أشطر بكتير",
+    "هو فاكر اللعبة سهلة، خليه يتعلم",
+    "خليكي مركزة، الفرصة قريبة",
+    "ده مش هروب ده دلع زيادة عن اللزوم",
+    "كل مرة بتحاولي بتاخدي خبرة جديدة",
+    "هو حاسس نفسه قوي بس ده مؤقت",
+    "ده زرار بيغازل اللعبة وهو بيهرب 😏",
+    "يلا يا أسطورة، حاولي زاوية مختلفة",
+    "صدقيني التعب ده هيستحق آخره",
+    "ده زرار واثق زيادة عن اللزوم",
+    "خليكي فاكرة، إنتي اللي بتتحكمي مش هو",
+    "كل محاولة بتقرب الحظ يا يارا",
+    "هو بيهرب بس قلبه واقف معاكي",
+    "ده زرار بيمثل دور الصعب",
+    "يلا يا قمر، خليكي زي القناصة",
+    "صدقيني هيتعب قبل ما تتعبي",
+    "ده زرار بيحاول يقنع نفسه إنه فايز",
+    "خليكي ثابتة، الجري مش هيفيدك انتي",
+    "كل ثانية بتقرب من اللحظة الحاسمة",
+    "هو شايف نفسه بطل، بس مفيش جمهور",
+    "ده زرار يلعب بإحساس بس مفيش نتيجة",
+    "يلا يا روشة، انتي قريبة من غير ما تحسي",
+    "صدقيني الزرار ده هيندم على الهروب",
+    "ده زرار شقي بس النهاية في إيدك",
+    "خليكي زي الأبطال، خطوة بخطوة",
+    "كل مرة بتحاولي بتقربي من حاجة هتستحقيها يا يارا 😏",
+    "هو هيتعب قريب وهيسلم نفسه",
+    "ده آخر حاجة هيعملها الزرار إنه يستسلم بسهولة",
+    "يلا يا قمر، اللحظة الحاسمة جاية",
+    "صدقيني الجولة دي بتاعتك يا يارا",
+    "خلصت اللعبة قريب، وهتبقى عليكي حاجة يا يارا 😏"
+  ];
+
+  let escapeCount = 0;
+  let lastTauntIdx = -1;
+  let yesScale = 1;
+
+  function randomPositionWithin(container, btn){
+    const cRect = container.getBoundingClientRect();
+    const bw = btn.offsetWidth || 110;
+    const bh = btn.offsetHeight || 48;
+    const maxLeft = Math.max(cRect.width - bw - 8, 8);
+    const maxTop = Math.max(cRect.height - bh - 8, 8);
+    const left = Math.random() * maxLeft;
+    const top = Math.random() * maxTop;
+    return {left, top};
+  }
+
+  function dodge(){
+    const pos = randomPositionWithin(stage, noBtn);
+    noBtn.style.position = 'absolute';
+    noBtn.style.transform = 'none';
+    noBtn.style.right = 'auto';
+    noBtn.style.top = pos.top + 'px';
+    noBtn.style.left = pos.left + 'px';
+
+    escapeCount++;
+    countEl.textContent = escapeCount;
+
+    let idx = Math.floor(Math.random() * taunts.length);
+    if(idx === lastTauntIdx){ idx = (idx + 1) % taunts.length; }
+    lastTauntIdx = idx;
+    taunt.textContent = taunts[idx];
+
+    if(yesScale < 1.5){
+      yesScale += 0.05;
+      yesBtn.style.transform = `scale(${yesScale})`;
+    }
+  }
+
+  noBtn.addEventListener('mouseenter', dodge);
+  noBtn.addEventListener('touchstart', function(e){
+    e.preventDefault();
+    dodge();
+  }, {passive:false});
+
+  function launchConfetti(){
+    const colors = ['#FF3D8A', '#FFD93D', '#B83DFF', '#FFF6E9'];
+    for(let i = 0; i < 40; i++){
+      const piece = document.createElement('div');
+      piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDuration = (1.2 + Math.random() * 1.2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.4) + 's';
+      stage.appendChild(piece);
+      setTimeout(() => piece.remove(), 3000);
+    }
+  }
+
+  yesBtn.addEventListener('click', function(){
+    launchConfetti();
+    finalScore.textContent = escapeCount > 0
+      ? `(بعد ${escapeCount} محاولة هروب رسمية... بقى عليكي حاجة 😏)`
+      : `(استسلمتي من أول دوسة، يا قلب اللعبة 😏)`;
+    overlay.classList.add('show');
+  });
+</script>
+
+</body>
+</html>
